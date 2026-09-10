@@ -1,0 +1,90 @@
+erDiagram
+    CUSTOMER {
+        int id PK
+        string name
+        string phone
+        string address
+        datetime created_at
+    }
+
+    TABLE {
+        int id PK
+        string number
+        string status "free | occupied | reserved"
+    }
+
+    STAFF {
+        int id PK
+        string name
+        string role "waiter | cashier | kitchen | manager"
+    }
+
+    MENU_CATEGORY {
+        int id PK
+        string name
+        int sort_order
+    }
+
+    MENU_ITEM {
+        int id PK
+        int category_id FK
+        string name
+        decimal price
+        bool is_available
+    }
+
+    MODIFIER {
+        int id PK
+        string name
+        decimal price_delta
+    }
+
+    MENU_ITEM_MODIFIER {
+        int menu_item_id FK
+        int modifier_id FK
+    }
+
+    ORDER {
+        int id PK
+        int table_id FK "nullable - null for takeaway/delivery"
+        int customer_id FK "nullable - dine-in walk-ins have none"
+        int staff_id FK
+        string order_type "dine_in | takeaway | delivery"
+        string status "open | sent_to_kitchen | ready | served | paid | closed"
+        datetime created_at
+        datetime closed_at
+    }
+
+    ORDER_ITEM {
+        int id PK
+        int order_id FK
+        int menu_item_id FK
+        int quantity
+        decimal unit_price
+        string notes
+    }
+
+    ORDER_ITEM_MODIFIER {
+        int order_item_id FK
+        int modifier_id FK
+    }
+
+    PAYMENT {
+        int id PK
+        int order_id FK
+        decimal amount
+        string method "cash | card | wallet"
+        datetime paid_at
+    }
+
+    CUSTOMER ||--o{ ORDER : "places (optional)"
+    TABLE ||--o{ ORDER : "hosts (optional)"
+    STAFF ||--o{ ORDER : "handles"
+    ORDER ||--|{ ORDER_ITEM : contains
+    MENU_CATEGORY ||--o{ MENU_ITEM : groups
+    MENU_ITEM ||--o{ ORDER_ITEM : "ordered as"
+    MENU_ITEM ||--o{ MENU_ITEM_MODIFIER : "allows"
+    MODIFIER ||--o{ MENU_ITEM_MODIFIER : "available for"
+    ORDER_ITEM ||--o{ ORDER_ITEM_MODIFIER : "customized with"
+    MODIFIER ||--o{ ORDER_ITEM_MODIFIER : "applied as"
+    ORDER ||--o{ PAYMENT : "settled by"
